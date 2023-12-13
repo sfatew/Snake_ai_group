@@ -2,6 +2,7 @@ import pygame
 import random
 from enum import Enum
 from collections import namedtuple
+import time
 
 pygame.init()
 font = pygame.font.Font('arial.ttf', 25)
@@ -27,13 +28,14 @@ SPEED = 20
 
 class SnakeGame:
     
-    def __init__(self, w=640, h=480):
+    def __init__(self, w=720, h=480):
         self.w = w
         self.h = h
         # init display
-        self.display = pygame.display.set_mode((self.w, self.h))
-        pygame.display.set_caption('Snake')
-        self.clock = pygame.time.Clock()
+        self.display = pygame.display.set_mode((self.w, self.h))    #left=0, top=0
+        pygame.display.set_caption('Snake game')
+        # FPS (frames per second) controller
+        self.fps = pygame.time.Clock()
         
         # init game state
         self.direction = Direction.RIGHT
@@ -48,6 +50,7 @@ class SnakeGame:
         self._place_food()
         
     def _place_food(self):
+        #x, y are the left and top edge the food block
         x = random.randint(0, (self.w-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
         y = random.randint(0, (self.h-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
         self.food = Point(x, y)
@@ -61,19 +64,25 @@ class SnakeGame:
                 pygame.quit()
                 quit()
             if event.type == pygame.KEYDOWN:
+            #Note that:
+            #If two keys pressed simultaneously we don't want snake to turn back and hit itself
                 if event.key == pygame.K_LEFT:
-                    self.direction = Direction.LEFT
+                    if self.direction != Direction.RIGHT:   
+                        self.direction = Direction.LEFT
                 elif event.key == pygame.K_RIGHT:
-                    self.direction = Direction.RIGHT
+                    if self.direction != Direction.LEFT:
+                        self.direction = Direction.RIGHT
                 elif event.key == pygame.K_UP:
-                    self.direction = Direction.UP
+                    if self.direction != Direction.DOWN:
+                        self.direction = Direction.UP
                 elif event.key == pygame.K_DOWN:
-                    self.direction = Direction.DOWN
-        
+                    if self.direction != Direction.UP:
+                        self.direction = Direction.DOWN
+
         # 2. move
         self._move(self.direction) # update the head
-        self.snake.insert(0, self.head)
-        
+        self.snake.insert(0, self.head) #insert the new position of the head at the beginning of the list
+
         # 3. check if game over
         game_over = False
         if self._is_collision():
@@ -89,13 +98,15 @@ class SnakeGame:
         
         # 5. update ui and clock
         self._update_ui()
-        self.clock.tick(SPEED)
+        self.fps.tick(SPEED)
         # 6. return game over and score
         return game_over, self.score
     
     def _is_collision(self):
         # hits boundary
         if self.head.x > self.w - BLOCK_SIZE or self.head.x < 0 or self.head.y > self.h - BLOCK_SIZE or self.head.y < 0:
+            # print(self.head)
+            # time.sleep(2)
             return True
         # hits itself
         if self.head in self.snake[1:]:
@@ -103,13 +114,14 @@ class SnakeGame:
         
         return False
         
-    def _update_ui(self):
+    def _update_ui(self):   #update the display of the game
         self.display.fill(BLACK)
         
-        for pt in self.snake:
-            pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+        for pt in self.snake:   #display the snake(with darker color on the outer of the block)
+            pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE)) #draw a rectangle: (on plane, color, (left,top,widht,height))
             pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x+4, pt.y+4, 12, 12))
-            
+
+        #display the food 
         pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
         
         text = font.render("Score: " + str(self.score), True, WHITE)
