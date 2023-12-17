@@ -3,6 +3,8 @@ import random
 import numpy as np
 from snake_game_ai import SnakeGameAI, Direction, Point
 from collections import deque   #double-end queue
+from plot import plot
+from model import Linear_QNet, QTrainer
 
 Max_Memory = 100000
 Batch_size = 1024
@@ -14,8 +16,8 @@ class Agent:
         self.epsilon = 0    #randomness control
         self.gamma = 0      #discount rate
         self.memory = deque(maxlen=Max_Memory)  #when the memory was exceeded, auto popleft()
-        self.model=None
-        self.trainer=None
+        self.model = Linear_QNet(11, 256, 3)
+        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
 
     def get_state(self, game):
@@ -108,7 +110,7 @@ def train():
     total_score = 0
     record = 0              #best score
     agent = Agent()
-    game = SnakeGameAI
+    game = SnakeGameAI()
     while True:
         # get old state
         state_old = agent.get_state(game)
