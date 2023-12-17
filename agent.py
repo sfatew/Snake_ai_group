@@ -14,7 +14,7 @@ class Agent:
     def __init__(self):
         self.n_games = 0    #number of game
         self.epsilon = 0    #randomness control
-        self.gamma = 0      #discount rate
+        self.gamma = 0.9      #discount rate
         self.memory = deque(maxlen=Max_Memory)  #when the memory was exceeded, auto popleft()
         self.model = Linear_QNet(11, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
@@ -56,7 +56,7 @@ class Agent:
             (dir_r and game.is_collision(point_u)) or 
             (dir_l and game.is_collision(point_d)),
             
-            # Move direction
+            # Current direction
             dir_l,
             dir_r,
             dir_u,
