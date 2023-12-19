@@ -131,8 +131,8 @@ def train():
         agent.model.load_state_dict(load_checkpoint["model_state"])
         agent.trainer.optimizer.load_state_dict(load_checkpoint["optim_state"])
 
-        print(agent.record)
-        print(agent.n_games)
+        # print(agent.record)
+        # print(agent.n_games)
 
     while True:
         # get old state
@@ -161,7 +161,19 @@ def train():
 
             if score > agent.record:
                 agent.record = score
-                agent.model.save()
+                # save the best record
+                model_folder_path = './model'
+                if not os.path.exists(model_folder_path):
+                    os.makedirs(model_folder_path)
+
+                file_name = os.path.join(model_folder_path, 'model.pth')
+
+                save_best = {
+                    "model_state": agent.model.state_dict(),
+                    "optim_state": agent.trainer.optimizer.state_dict()
+                }
+
+                torch.save(save_best, file_name) 
 
                 # for param in agent.model.parameters():
                 #     print(param)
@@ -196,18 +208,19 @@ def run():
     agent.record = 0              #best score
 
     if os.path.exists('model/model.pth'):
+            load_save = torch.load('model/model.pth')
+            agent.model.load_state_dict(load_save["model_state"])
+            agent.trainer.optimizer.load_state_dict(load_save["optim_state"])
 
-            agent.model.load_state_dict(torch.load('model/model.pth'))
-
-            for param in agent.model.parameters():
-                print(param)
+            # for param in agent.model.parameters():
+            #     print(param)
 
     while True:
         # get old state
         state_old = agent.get_state(game)
 
         #get move
-        final_move = agent.get_action(state_old)
+        final_move = agent.exploit_act(state_old)
         # final_move = agent.exploit_act(state_old)
 
         #perform move and get new state
@@ -222,6 +235,6 @@ def run():
 
 if __name__=='__main__':
     
-    # run()
-    train()
+    run()
+    # train()
 
