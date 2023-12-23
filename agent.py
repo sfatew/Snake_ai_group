@@ -5,6 +5,7 @@ from snake_game_ai import SnakeGameAI, Direction, Point
 from collections import deque   #double-end queue
 from plot import plot
 from model import Linear_QNet, QTrainer
+import os
 
 Max_Memory = 100000
 Batch_size = 1024
@@ -18,7 +19,7 @@ class Agent:
         self.memory = deque(maxlen=Max_Memory)  #when the memory was exceeded, auto popleft()
         self.model = Linear_QNet(11, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-
+        self.record = 0              #best score
 
     def get_state(self, game):
         head = game.snake[0]
@@ -98,9 +99,18 @@ class Agent:
         else:
             #explotation
             state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0)
+            prediction = self.model(state0)         # put state0 into forward in modal 
             move = torch.argmax(prediction).item()
             final_move[move] = 1
+
+        return final_move
+
+    def exploit_act(self,state):
+        final_move = [0,0,0]
+        state0 = torch.tensor(state, dtype=torch.float)
+        prediction = self.model(state0)         # put state0 into forward in modal 
+        move = torch.argmax(prediction).item()
+        final_move[move] = 1
 
         return final_move
 
@@ -108,15 +118,29 @@ def train():
     plot_scores=[]          #keep track of the scores
     plot_mean_scores = []    #mean of scores
     total_score = 0
-    record = 0              #best score
     agent = Agent()
     game = SnakeGameAI()
+
+
+    if os.path.exists('model/checkpoint.pth'):
+        load_checkpoint = torch.load('model/checkpoint.pth')
+        print(load_checkpoint)
+
+        agent.n_games = load_checkpoint["n_games"]
+        agent.record = load_checkpoint["record"]
+        agent.model.load_state_dict(load_checkpoint["model_state"])
+        agent.trainer.optimizer.load_state_dict(load_checkpoint["optim_state"])
+
+        # print(agent.record)
+        # print(agent.n_games)
+
     while True:
         # get old state
         state_old = agent.get_state(game)
 
         #get move
         final_move = agent.get_action(state_old)
+        # final_move = agent.exploit_act(state_old)
 
         #perform move and get new state
         reward, game_over, score = game.play_step(final_move)
@@ -135,11 +159,26 @@ def train():
             agent.n_games += 1
             agent.train_long_memory()
 
-            if score > record:
-                record = score
-                agent.model.save()
+            if score > agent.record:
+                agent.record = score
+                # save the best record
+                model_folder_path = './model'
+                if not os.path.exists(model_folder_path):
+                    os.makedirs(model_folder_path)
 
-            print('Game', agent.n_games, 'Score', score, 'Record:', record)
+                file_name = os.path.join(model_folder_path, 'model.pth')
+
+                save_best = {
+                    "model_state": agent.model.state_dict(),
+                    "optim_state": agent.trainer.optimizer.state_dict()
+                }
+
+                torch.save(save_best, file_name) 
+
+                # for param in agent.model.parameters():
+                #     print(param)
+
+            print('Game', agent.n_games, 'Score', score, 'Record:', agent.record)
 
             plot_scores.append(score)
             total_score += score
@@ -147,6 +186,55 @@ def train():
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
 
+        #checkpoint
+        model_folder_path = './model'
+        if not os.path.exists(model_folder_path):
+            os.makedirs(model_folder_path)
+
+        file_name = os.path.join(model_folder_path, 'checkpoint.pth')
+
+        checkpoint = {
+            "n_games": agent.n_games,
+            "record": agent.record,
+            "model_state": agent.model.state_dict(),
+            "optim_state": agent.trainer.optimizer.state_dict()
+        }
+
+        torch.save(checkpoint, file_name) 
+
+def run():
+    agent = Agent()
+    game = SnakeGameAI()
+    agent.record = 0              #best score
+
+    if os.path.exists('model/model.pth'):
+            load_save = torch.load('model/model.pth')
+            agent.model.load_state_dict(load_save["model_state"])
+            agent.trainer.optimizer.load_state_dict(load_save["optim_state"])
+
+            # for param in agent.model.parameters():
+            #     print(param)
+
+    while True:
+        # get old state
+        state_old = agent.get_state(game)
+
+        #get move
+        final_move = agent.exploit_act(state_old)
+        # final_move = agent.exploit_act(state_old)
+
+        #perform move and get new state
+        reward, game_over, score = game.play_step(final_move)
+
+        state_new = agent.get_state(game)
+
+        if game_over:
+            print('Game', agent.n_games, 'Score', score, 'Record:', agent.record)
+            break
+
 
 if __name__=='__main__':
-    train()
+    
+    run()
+    # train()
+
