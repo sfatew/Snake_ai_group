@@ -1,6 +1,6 @@
 # Snake_ai
 
-
+Using reinforcement learning to teach the AI to play sanke
 
 
 * To download the code : `git clone https://github.com/sfatew/Snake_ai_group.git`.
