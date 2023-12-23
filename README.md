@@ -1,8 +1,8 @@
 # Snake_ai
 
-
+Using reinforcement learning to teach an AI to play snake
 
 
 * To download the code : `git clone https://github.com/sfatew/Snake_ai_group.git`.
-* to install requirements libraby: `pip install -q -r requirements.txt`
-* 
+* To install requirements libraries: `pip install -q -r requirements.txt`
+* To run the file: `python main.py`
