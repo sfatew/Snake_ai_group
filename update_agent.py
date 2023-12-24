@@ -24,7 +24,7 @@ class Agent:
 
     def is_danger_ahead_X_minus(self,game):
         new_pt = game.snake[0]
-        count = 0
+        # count = 0
         while not game.is_collision_self(new_pt) and not game.is_collision_boundary(new_pt):
             new_pt = Point(new_pt.x - 20, new_pt.y) 
             # count +=1
