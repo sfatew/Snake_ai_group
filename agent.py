@@ -21,31 +21,11 @@ class Agent:
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         self.record = 0              #best score
 
-<<<<<<< Updated upstream
-    def check_empty_block(self, game, point):
-        checked=deque([])      # list of empty block & including the head
-=======
     def _consecutive_points(self,point):
->>>>>>> Stashed changes
         point_l = Point(point.x - 20, point.y)
         point_r = Point(point.x + 20, point.y)
         point_u = Point(point.x, point.y - 20)
         point_d = Point(point.x, point.y + 20)
-<<<<<<< Updated upstream
-        if game.is_collision(point):
-            return None
-        else:
-            checked.append(point)
-            if not game.is_collision(point_d) and point_d not in checked:
-                self.check_empty_block(game,point_d)
-            if not game.is_collision(point_l) and point_l not in checked:
-                self.check_empty_block(game,point_l)
-            if not game.is_collision(point_r) and point_r not in checked:
-                self.check_empty_block(game,point_r)
-            if not game.is_collision(point_u) and point_u not in checked:
-                self.check_empty_block(game,point_u)
-
-=======
         return [point_l,point_r,point_u,point_d]
 
     def check_empty_block(self, game, point, head):       # check the number of empty block when take action
@@ -68,16 +48,12 @@ class Agent:
         # print(head)
         # print(checked)
         checked.remove(head)    # remove the head out of the list
->>>>>>> Stashed changes
         return checked
 
     def get_state(self, game):
         head = game.snake[0]
 
-<<<<<<< Updated upstream
-=======
         game_size = ((game.w/20)*(game.h/20))
->>>>>>> Stashed changes
 
         # check 1 block in each direction
         point_l,point_r,point_u,point_d = self._consecutive_points(head)
@@ -89,24 +65,6 @@ class Agent:
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
 
-<<<<<<< Updated upstream
-        if dir_d:
-            check_straight = len(self.check_empty_block(game,point_d))
-            check_right = len(self.check_empty_block(game,point_l))
-            check_left = len(self.check_empty_block(game,point_r))
-        if dir_r:
-            check_straight = len(self.check_empty_block(game,point_r))
-            check_right = len(self.check_empty_block(game,point_d))
-            check_left = len(self.check_empty_block(game,point_u))
-        if dir_l:
-            check_straight = len(self.check_empty_block(game,point_l))
-            check_right = len(self.check_empty_block(game,point_u))
-            check_left = len(self.check_empty_block(game,point_d))
-        if dir_u:
-            check_straight = len(self.check_empty_block(game,point_u))
-            check_right = len(self.check_empty_block(game,point_r))
-            check_left = len(self.check_empty_block(game,point_l))
-=======
         danger_straight = False
         danger_right = False
         danger_left = False
@@ -176,7 +134,6 @@ class Agent:
                 check_straight = len(self.check_empty_block(game,point_u, game.head))
                 check_right = 0
                 check_left = game_size - check_straight - game.lensnake
->>>>>>> Stashed changes
 
         state = [
             # danger in 1 block
@@ -201,16 +158,10 @@ class Agent:
             game.food.y < game.head.y,  # food up
             game.food.y > game.head.y,  # food down
 
-<<<<<<< Updated upstream
-            check_straight,
-            check_right,
-            check_left
-=======
             # check the number of fesible block if we go straight, right, left
             check_straight/game_size,
             check_right/game_size,
             check_left/game_size
->>>>>>> Stashed changes
 
             ]
 
