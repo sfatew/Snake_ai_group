@@ -7,7 +7,7 @@ import numpy as np
 pygame.init()
 
 #font = pygame.font.SysFont('arial', 25)
-font = pygame.font.Font('arial.ttf', 15)
+font = pygame.font.Font('arial.ttf', 18)
 
 class Direction(Enum):
     RIGHT = 1
@@ -18,6 +18,7 @@ class Direction(Enum):
 Point = namedtuple('Point', 'x, y')
 
 # rgb colors
+RED = (255,0,0)
 FONT = (200, 200, 220)
 WHITE = (255, 255, 255)
 RED = (200,0,0)
@@ -36,7 +37,9 @@ class SnakeGameAI:
         self.w = w
         self.h = h
         # init display
-        self.display = pygame.display.set_mode((self.w, self.h))
+        self.display = pygame.display.set_mode((self.w, self.h +80))
+        self.border = pygame.Surface((self.w, self.h +4))
+        self.game = pygame.Surface((self.w,self.h))
         pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
         self.my_ls = []
@@ -109,7 +112,7 @@ class SnakeGameAI:
         if pt is None:
             pt = self.head
         # hits boundary
-        if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h - BLOCK_SIZE or pt.y < 0:
+        if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h  - BLOCK_SIZE or pt.y < 60:
             return True
         # hits itself
         if pt in self.snake[1:]:
@@ -119,7 +122,20 @@ class SnakeGameAI:
 
         
     def _update_ui(self):
-        self.display.fill(BLACK)
+        
+        self.game.fill(BLACK)
+        self.display.fill(WHITE)
+        self.border.fill(RED)
+
+        text = font.render("Score: " + str(self.score), True, BLACK)
+        self.my_ls.append(self.score)
+        text2 = font.render("Max Score: " + str(max(self.my_ls)), True, BLACK)
+        text3 = font.render("Generation: " + str(self.count_iteration), True, BLACK)
+        self.display.blit(self.border,(0,0))
+        self.display.blit(self.game,(0,0))
+        self.display.blit(text, [self.w-120, self.h +15])
+        self.display.blit(text2, [self.w-120,self.h +35])
+        self.display.blit(text3, [self.w-120,self.h+ 55])
         pygame.draw.rect(self.display, HEAD, pygame.Rect(self.snake[0].x, self.snake[0].y, BLOCK_SIZE, BLOCK_SIZE))
         pygame.draw.rect(self.display,HEAD2 , pygame.Rect(self.snake[0].x+4, self.snake[0].y+4, 12, 12))
 
@@ -129,14 +145,7 @@ class SnakeGameAI:
 
         pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
 
-        text = font.render("Score: " + str(self.score), True, FONT)
-        self.my_ls.append(self.score)
-        text2 = font.render("Max Score: " + str(max(self.my_ls)), True, FONT)
-        text3 = font.render("Generation: " + str(self.count_iteration), True, FONT)
         
-        self.display.blit(text, [0, 0])
-        self.display.blit(text2, [0,20])
-        self.display.blit(text3, [0,40])
         pygame.display.flip()
 
   
