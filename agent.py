@@ -21,12 +21,17 @@ class Agent:
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         self.record = 0              #best score
 
+<<<<<<< Updated upstream
     def check_empty_block(self, game, point):
         checked=deque([])      # list of empty block & including the head
+=======
+    def _consecutive_points(self,point):
+>>>>>>> Stashed changes
         point_l = Point(point.x - 20, point.y)
         point_r = Point(point.x + 20, point.y)
         point_u = Point(point.x, point.y - 20)
         point_d = Point(point.x, point.y + 20)
+<<<<<<< Updated upstream
         if game.is_collision(point):
             return None
         else:
@@ -40,17 +45,42 @@ class Agent:
             if not game.is_collision(point_u) and point_u not in checked:
                 self.check_empty_block(game,point_u)
 
+=======
+        return [point_l,point_r,point_u,point_d]
+
+    def check_empty_block(self, game, point, head):       # check the number of empty block when take action
+
+        checked= [head]      # list of empty block & the head
+        stored = deque([])      # storing the block that will need to check
+
+        if game.is_collision(point):
+            return checked
+        else:
+            checked.append(point)
+            stored.append(point)
+            while len(stored) > 0:
+                pt = stored.popleft()
+                consecutive_points = self._consecutive_points(pt)
+                for p in consecutive_points:
+                    if p not in checked and not game.is_collision(p):
+                        checked.append(p)
+                        stored.append(p)
+        # print(head)
+        # print(checked)
+        checked.remove(head)    # remove the head out of the list
+>>>>>>> Stashed changes
         return checked
 
     def get_state(self, game):
         head = game.snake[0]
 
+<<<<<<< Updated upstream
+=======
+        game_size = ((game.w/20)*(game.h/20))
+>>>>>>> Stashed changes
 
         # check 1 block in each direction
-        point_l = Point(head.x - 20, head.y)
-        point_r = Point(head.x + 20, head.y)
-        point_u = Point(head.x, head.y - 20)
-        point_d = Point(head.x, head.y + 20)
+        point_l,point_r,point_u,point_d = self._consecutive_points(head)
         
         # the current direction of the snake    
         # return True or False
@@ -59,6 +89,7 @@ class Agent:
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
 
+<<<<<<< Updated upstream
         if dir_d:
             check_straight = len(self.check_empty_block(game,point_d))
             check_right = len(self.check_empty_block(game,point_l))
@@ -75,26 +106,88 @@ class Agent:
             check_straight = len(self.check_empty_block(game,point_u))
             check_right = len(self.check_empty_block(game,point_r))
             check_left = len(self.check_empty_block(game,point_l))
+=======
+        danger_straight = False
+        danger_right = False
+        danger_left = False
+
+        if (dir_r and game.is_collision(point_r)) or (dir_l and game.is_collision(point_l)) or (dir_u and game.is_collision(point_u)) or (dir_d and game.is_collision(point_d)):
+            danger_straight = True
+        if (dir_u and game.is_collision(point_r)) or (dir_d and game.is_collision(point_l)) or (dir_l and game.is_collision(point_u)) or (dir_r and game.is_collision(point_d)):
+            danger_right = True
+        if (dir_d and game.is_collision(point_r)) or (dir_u and game.is_collision(point_l)) or (dir_r and game.is_collision(point_u)) or (dir_l and game.is_collision(point_d)):
+            danger_left = True
+
+        # set value of check_empty for the case where there is no danger
+        check_straight = game_size - game.lensnake
+        check_right = game_size - game.lensnake
+        check_left = game_size - game.lensnake
+
+        if danger_straight:
+            if dir_d:
+                check_straight = 0
+                check_right = len(self.check_empty_block(game,point_l, game.head))
+                check_left = game_size - check_right - game.lensnake
+            if dir_r:
+                check_straight = 0
+                check_right = len(self.check_empty_block(game,point_d, game.head))
+                check_left = game_size - check_right  - game.lensnake
+            if dir_l:
+                check_straight = 0
+                check_right = len(self.check_empty_block(game,point_u, game.head))
+                check_left = game_size - check_right  - game.lensnake
+            if dir_u:
+                check_straight = 0
+                check_right = len(self.check_empty_block(game,point_r, game.head))
+                check_left = game_size - check_right  - game.lensnake
+
+        elif danger_left:
+            if dir_d:
+                check_straight = len(self.check_empty_block(game,point_d, game.head))
+                check_right = game_size - check_straight  - game.lensnake
+                check_left = 0
+            if dir_r:
+                check_straight = len(self.check_empty_block(game,point_r, game.head))
+                check_right = game_size - check_straight  - game.lensnake
+                check_left = 0
+            if dir_l:
+                check_straight = len(self.check_empty_block(game,point_l, game.head))
+                check_right = game_size - check_straight  - game.lensnake
+                check_left = 0
+            if dir_u:
+                check_straight = len(self.check_empty_block(game,point_u, game.head))
+                check_right = game_size - check_straight  - game.lensnake
+                check_left = 0
+
+        elif danger_right:
+            if dir_d:
+                check_straight = len(self.check_empty_block(game,point_d, game.head))
+                check_right = 0
+                check_left = game_size -  check_straight - game.lensnake
+            if dir_r:
+                check_straight = len(self.check_empty_block(game,point_r, game.head))
+                check_right = 0
+                check_left = game_size - check_straight - game.lensnake
+            if dir_l:
+                check_straight = len(self.check_empty_block(game,point_l, game.head))
+                check_right = 0
+                check_left = game_size - check_straight - game.lensnake
+            if dir_u:
+                check_straight = len(self.check_empty_block(game,point_u, game.head))
+                check_right = 0
+                check_left = game_size - check_straight - game.lensnake
+>>>>>>> Stashed changes
 
         state = [
             # danger in 1 block
             # Danger straight
-            (dir_r and game.is_collision(point_r)) or 
-            (dir_l and game.is_collision(point_l)) or 
-            (dir_u and game.is_collision(point_u)) or 
-            (dir_d and game.is_collision(point_d)),
+            danger_straight,
 
             # Danger right
-            (dir_u and game.is_collision(point_r)) or 
-            (dir_d and game.is_collision(point_l)) or 
-            (dir_l and game.is_collision(point_u)) or 
-            (dir_r and game.is_collision(point_d)),
+            danger_right,
 
             # Danger left
-            (dir_d and game.is_collision(point_r)) or 
-            (dir_u and game.is_collision(point_l)) or 
-            (dir_r and game.is_collision(point_u)) or 
-            (dir_l and game.is_collision(point_d)),
+            danger_left,
             
             # Current direction
             dir_l,
@@ -108,9 +201,16 @@ class Agent:
             game.food.y < game.head.y,  # food up
             game.food.y > game.head.y,  # food down
 
+<<<<<<< Updated upstream
             check_straight,
             check_right,
             check_left
+=======
+            # check the number of fesible block if we go straight, right, left
+            check_straight/game_size,
+            check_right/game_size,
+            check_left/game_size
+>>>>>>> Stashed changes
 
             ]
 
