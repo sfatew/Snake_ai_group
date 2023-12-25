@@ -133,9 +133,9 @@ class SnakeGameAI:
         text3 = font.render("Generation: " + str(self.count_iteration), True, BLACK)
         self.display.blit(self.border,(0,0))
         self.display.blit(self.game,(0,0))
-        self.display.blit(text, [self.w-120, self.h +15])
-        self.display.blit(text2, [self.w-120,self.h +35])
-        self.display.blit(text3, [self.w-120,self.h+ 55])
+        self.display.blit(text, [self.w-140, self.h +15])
+        self.display.blit(text2, [self.w-140,self.h +35])
+        self.display.blit(text3, [self.w-140,self.h+ 55])
         pygame.draw.rect(self.display, HEAD, pygame.Rect(self.snake[0].x, self.snake[0].y, BLOCK_SIZE, BLOCK_SIZE))
         pygame.draw.rect(self.display,HEAD2 , pygame.Rect(self.snake[0].x+4, self.snake[0].y+4, 12, 12))
 
