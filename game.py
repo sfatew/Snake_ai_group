@@ -42,7 +42,7 @@ class SnakeGameAI:
         self.game = pygame.Surface((self.w,self.h))
         pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
-        self.my_ls = []
+        self.high_score = 0
         self.count_iteration = 0
         self.reset()
         
@@ -56,12 +56,14 @@ class SnakeGameAI:
         self.snake = [self.head,
                       Point(self.head.x-BLOCK_SIZE, self.head.y),
                       Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
+        
+        self.lensnake=len(self.snake)
 
         self.score = 0
         self.food = None
         self._place_food()
         self.count_iteration +=1
-        self.frame_iteration = 0
+        self.frame_iteration = 0    # number of step travel till now
         
 
 
@@ -97,6 +99,7 @@ class SnakeGameAI:
         if self.head == self.food:
             self.score += 1
             reward = 10
+            self.lensnake +=1
             self._place_food()
         else:
             self.snake.pop()
@@ -112,7 +115,7 @@ class SnakeGameAI:
         if pt is None:
             pt = self.head
         # hits boundary
-        if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h  - BLOCK_SIZE or pt.y < 60:
+        if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h  - BLOCK_SIZE or pt.y < 0:
             return True
         # hits itself
         if pt in self.snake[1:]:
@@ -128,8 +131,7 @@ class SnakeGameAI:
         self.border.fill(RED)
 
         text = font.render("Score: " + str(self.score), True, BLACK)
-        self.my_ls.append(self.score)
-        text2 = font.render("Max Score: " + str(max(self.my_ls)), True, BLACK)
+        text2 = font.render("Max Score: " + str((self.high_score)), True, BLACK)
         text3 = font.render("Generation: " + str(self.count_iteration), True, BLACK)
         self.display.blit(self.border,(0,0))
         self.display.blit(self.game,(0,0))
