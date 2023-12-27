@@ -1,4 +1,4 @@
-from agent import train, run
+from agent_primitive import train, run
 
-# train()
-run()
+train()
+#run()
