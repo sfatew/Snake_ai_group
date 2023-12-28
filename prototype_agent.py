@@ -291,31 +291,33 @@ def train():
 def run():
     agent = Agent()
     game = SnakeGameAI()
-    agent.record = 0              #best score
 
-    if os.path.exists('.model/model_3.pth'):
-            load_save = torch.load('.model/model_3.pth')
-            agent.model.load_state_dict(load_save["model_state"])
-            agent.trainer.optimizer.load_state_dict(load_save["optim_state"])
+
+    if os.path.exists('model/checkpoint_1.pth'):
+        load_checkpoint = torch.load('model/checkpoint_1.pth')
+        # print(load_checkpoint)
+
+        agent.n_games = load_checkpoint["n_games"]
+        agent.record = load_checkpoint["record"]
+        agent.model.load_state_dict(load_checkpoint["model_state"])
+        agent.trainer.optimizer.load_state_dict(load_checkpoint["optim_state"])
+
 
     while True:
         # get old state
         state_old = agent.get_state(game)
-        print(state_old)
 
         #get move
         final_move = agent.exploit_act(state_old)
-        # final_move = agent.exploit_act(state_old)
 
         #perform move and get new state
         reward, game_over, score = game.play_step(final_move)
 
         state_new = agent.get_state(game)
-        print(state_new)
 
         if game_over:
-            print('Game', agent.n_games, 'Score', score, 'Record:', agent.record, 'Frame_iteration', game.frame_iteration)
-            # break
+            print( 'Score', score)
+            break
 
 
 if __name__=='__main__':
