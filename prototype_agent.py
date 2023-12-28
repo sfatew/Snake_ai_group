@@ -3,7 +3,7 @@ import random
 import numpy as np
 from game import SnakeGameAI, Direction, Point
 from collections import deque   #double-end queue
-from helper import plot
+from plot import plot
 from model import Linear_QNet, QTrainer
 import os
 from itertools import islice
