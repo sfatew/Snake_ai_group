@@ -4,11 +4,12 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
-from helper import plot
+from plot import plot
+import os
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
-LR = 0.001
+LR = 0.001  #learning rate
 
 class Agent:
 
@@ -19,7 +20,7 @@ class Agent:
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
         self.model = Linear_QNet(11, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-
+        self.record = 0              #best score
 
     def get_state(self, game): # return the state of snake
 
@@ -107,6 +108,20 @@ def train():
     record = 0
     agent = Agent()
     game = SnakeGameAI()
+
+    numgame = 0 # number of game since starting the train() func
+
+
+    if os.path.exists('model/checkpoint.pth'):
+        load_checkpoint = torch.load('model/checkpoint.pth')
+        # print(load_checkpoint)
+
+        agent.n_games = load_checkpoint["n_games"]
+        agent.record = load_checkpoint["record"]
+        agent.model.load_state_dict(load_checkpoint["model_state"])
+        agent.trainer.optimizer.load_state_dict(load_checkpoint["optim_state"])
+
+    game.count_iteration = agent.n_games
     
     while True:
         # get old state
@@ -129,19 +144,48 @@ def train():
             # train long memory, plot result
             game.reset()
             agent.n_games += 1
+            numgame += 1
             agent.train_long_memory()
 
-            if score > record:
-                record = score
-                agent.model.save()
+            if score > agent.record:
+                agent.record = score
+                # save the best record
+                model_folder_path = './model'
+                if not os.path.exists(model_folder_path):
+                    os.makedirs(model_folder_path)
+
+                file_name = os.path.join(model_folder_path, 'model.pth')
+
+                save_best = {
+                    "model_state": agent.model.state_dict(),
+                    "optim_state": agent.trainer.optimizer.state_dict()
+                }
+
+                torch.save(save_best, file_name) 
 
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
             plot_scores.append(score)
             total_score += score
-            mean_score = total_score / agent.n_games
+            mean_score = total_score / numgame
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
+
+        #checkpoint
+        model_folder_path = './model'
+        if not os.path.exists(model_folder_path):
+            os.makedirs(model_folder_path)
+
+        file_name = os.path.join(model_folder_path, 'checkpoint.pth')
+
+        checkpoint = {
+            "n_games": agent.n_games,
+            "record": agent.record,
+            "model_state": agent.model.state_dict(),
+            "optim_state": agent.trainer.optimizer.state_dict()
+        }
+
+        torch.save(checkpoint, file_name) 
 
 
 if __name__ == '__main__':
