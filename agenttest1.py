@@ -185,7 +185,7 @@ class Agent:
 
     def get_action(self, state):
          #random moves: exploration/exploitation
-        self.epsilon = 80 - self.n_games
+        self.epsilon = 120 - self.n_games
         final_move = [0,0,0]
         if random.randint(0, 200) < self.epsilon:
             #explporation
@@ -228,10 +228,10 @@ def train():
         agent.model.load_state_dict(load_checkpoint["model_state"])
         agent.trainer.optimizer.load_state_dict(load_checkpoint["optim_state"])
 
-    game.high_score = agent.record
     game.count_iteration = agent.n_games
 
     while True:
+        game.high_score = agent.record
         # get old state
         state_old = agent.get_state(game)
 
@@ -305,13 +305,15 @@ def run():
     game = SnakeGameAI()
 
 
-    if os.path.exists('model/model_1.pth'):
-            load_save = torch.load('model/model_1.pth')
-            agent.model.load_state_dict(load_save["model_state"])
-            agent.trainer.optimizer.load_state_dict(load_save["optim_state"])
+    if os.path.exists('model/checkpoint_1.pth'):
+        load_checkpoint = torch.load('model/checkpoint_1.pth')
+        # print(load_checkpoint)
 
-            # for param in agent.model.parameters():
-            #     print(param)
+        agent.n_games = load_checkpoint["n_games"]
+        agent.record = load_checkpoint["record"]
+        agent.model.load_state_dict(load_checkpoint["model_state"])
+        agent.trainer.optimizer.load_state_dict(load_checkpoint["optim_state"])
+
 
     while True:
         # get old state

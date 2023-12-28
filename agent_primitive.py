@@ -16,7 +16,7 @@ class Agent:
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0 # randomness
-        self.gamma = 0.9 # discount rate
+        self.gamma = 0.7 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
         self.model = Linear_QNet(11, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
@@ -124,6 +124,7 @@ def train():
     game.count_iteration = agent.n_games
     
     while True:
+        game.high_score = agent.record
         # get old state
         state_old = agent.get_state(game)
 
@@ -163,7 +164,7 @@ def train():
 
                 torch.save(save_best, file_name) 
 
-            print('Game', agent.n_games, 'Score', score, 'Record:', record)
+            print('Game', agent.n_games, 'Score', score, 'Record:', agent.record)
 
             plot_scores.append(score)
             total_score += score
@@ -187,6 +188,37 @@ def train():
 
         torch.save(checkpoint, file_name) 
 
+
+def run():
+    agent = Agent()
+    game = SnakeGameAI()
+
+
+    if os.path.exists('model/checkpoint_1.pth'):
+        load_checkpoint = torch.load('model/checkpoint_1.pth')
+        # print(load_checkpoint)
+
+        agent.n_games = load_checkpoint["n_games"]
+        agent.record = load_checkpoint["record"]
+        agent.model.load_state_dict(load_checkpoint["model_state"])
+        agent.trainer.optimizer.load_state_dict(load_checkpoint["optim_state"])
+
+
+    while True:
+        # get old state
+        state_old = agent.get_state(game)
+
+        #get move
+        final_move = agent.exploit_act(state_old)
+
+        #perform move and get new state
+        reward, game_over, score = game.play_step(final_move)
+
+        state_new = agent.get_state(game)
+
+        if game_over:
+            print( 'Score', score)
+            break
 
 if __name__ == '__main__':
     train()
