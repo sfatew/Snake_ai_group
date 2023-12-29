@@ -4,10 +4,10 @@ from enum import Enum
 from collections import namedtuple
 import numpy as np
 
-
 pygame.init()
-font = pygame.font.Font('arial.ttf', 25)
+
 #font = pygame.font.SysFont('arial', 25)
+font = pygame.font.Font('arial.ttf', 18)
 
 class Direction(Enum):
     RIGHT = 1
@@ -29,11 +29,11 @@ HEAD = (0,150,255)
 HEAD2 = (0,250,255)
 
 BLOCK_SIZE = 20
-SPEED = 1000
+SPEED = 40
 
 class SnakeGameAI:
-
-    def __init__(self, w=720, h=480):
+    
+    def __init__(self, w=640, h=480):
         self.w = w
         self.h = h
         # init display
@@ -46,6 +46,7 @@ class SnakeGameAI:
         self.count_iteration = 0
         self.reset()
         
+
 
     def reset(self):
         # init game state
@@ -63,6 +64,8 @@ class SnakeGameAI:
         self._place_food()
         self.count_iteration +=1
         self.frame_iteration = 0    # number of step travel till now
+        
+
 
     def _place_food(self):
         x = random.randint(0, (self.w-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
@@ -87,28 +90,7 @@ class SnakeGameAI:
         # 3. check if game over
         reward = 0
         game_over = False
-
-        if self.frame_iteration >= 110 and (self.frame_iteration - 110) % 100 == 0 and self.score != 0:
-            reward = 0.1 * self.lensnake
-        
-        # if self.is_collision_boundary():
-        #     game_over = True
-        #     reward = -10
-        #     return reward, game_over, self.score
-        
-        # if self.is_collision_self():
-        #     game_over = True
-        #     reward = -10
-        #     return reward, game_over, self.score
-        
-        
-        # if self.frame_iteration > 100*len(self.snake) and self.score == 0:
-        #     game_over = True
-        #     reward = -10
-        #     return reward, game_over, self.score
-
-    
-        if self.frame_iteration > 100*len(self.snake):
+        if self.is_collision() or self.frame_iteration > 100*len(self.snake):
             game_over = True
             reward = -10
             return reward, game_over, self.score
@@ -116,12 +98,12 @@ class SnakeGameAI:
         # 4. place new food or just move
         if self.head == self.food:
             self.score += 1
-            reward += 10
+            reward = 10
+            self.lensnake +=1
             self._place_food()
         else:
             self.snake.pop()
-
-            
+        
         # 5. update ui and clock
         self._update_ui()
         self.clock.tick(SPEED)
@@ -129,30 +111,6 @@ class SnakeGameAI:
         return reward, game_over, self.score
 
 
-    # def is_collision_boundary(self, pt=None):
-    #     if pt is None:
-    #         pt = self.head
-    #     # hits boundary
-    #     if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h - BLOCK_SIZE or pt.y < 0:
-    #         return True
-    #     # hits itself
-    #     # if pt in self.snake[1:]:
-    #     #     return True
-
-    #     return False
-    
-    # def is_collision_self(self, pt=None):
-    #     if pt is None:
-    #         pt = self.head
-    #     # hits boundary
-    #     # if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h - BLOCK_SIZE or pt.y < 0:
-    #     #     return True
-    #     # hits itself
-    #     if pt in self.snake[1:]:
-    #         return True
-        
-
-    #     return False
     def is_collision(self, pt=None):
         if pt is None:
             pt = self.head
@@ -192,7 +150,7 @@ class SnakeGameAI:
         
         pygame.display.flip()
 
-
+  
     def _move(self, action):
         # [straight, right, left]
 
