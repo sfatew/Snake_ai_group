@@ -15,7 +15,7 @@ class Linear_QNet(nn.Module):
     def forward(self, x):
         x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))
-        x = F.relu(self.linear3)
+        x = F.relu(self.linear3(x))
         x = self.linear4(x)
         return x
 
