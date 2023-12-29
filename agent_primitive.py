@@ -3,13 +3,13 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
-from model import Linear_QNet, QTrainer
+from model2 import Linear_QNet, QTrainer
 from plot import plot
 import os
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
-LR = 0.001  #learning rate
+LR = 0.0001  #learning rate
 
 class Agent:
 
@@ -88,7 +88,7 @@ class Agent:
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = 80 - self.n_games
+        self.epsilon = 100 - self.n_games
         final_move = [0,0,0]
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)

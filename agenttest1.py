@@ -4,18 +4,18 @@ import numpy as np
 from game import SnakeGameAI, Direction, Point
 from collections import deque   #double-end queue
 from plot import plot
-from model import Linear_QNet, QTrainer
+from model2 import Linear_QNet, QTrainer
 import os
 
 Max_Memory = 100000
 Batch_size = 1024
-LR = 0.001      #learning rate 
+LR = 0.0001      #learning rate 
 
 class Agent:
     def __init__(self):
         self.n_games = 0    #number of game
         self.epsilon = 0    #randomness control
-        self.gamma = 0.8      #discount rate
+        self.gamma = 0.7      #discount rate
         self.memory = deque(maxlen=Max_Memory)  #when the memory was exceeded, auto popleft()
         self.model = Linear_QNet(14, 256, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
@@ -185,7 +185,7 @@ class Agent:
 
     def get_action(self, state):
          #random moves: exploration/exploitation
-        self.epsilon = 120 - self.n_games
+        self.epsilon = 100 - self.n_games
         final_move = [0,0,0]
         if random.randint(0, 200) < self.epsilon:
             #explporation
