@@ -8,7 +8,7 @@ from model2 import Linear_QNet, QTrainer
 import os
 
 Max_Memory = 100000
-Batch_size = 1024
+Batch_size = 1000
 LR = 0.0001      #learning rate 
 
 class Agent:
@@ -17,7 +17,7 @@ class Agent:
         self.epsilon = 0    #randomness control
         self.gamma = 0.7      #discount rate
         self.memory = deque(maxlen=Max_Memory)  #when the memory was exceeded, auto popleft()
-        self.model = Linear_QNet(14, 256, 3)
+        self.model = Linear_QNet(14, 100, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         self.record = 0              #best score
 
