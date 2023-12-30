@@ -1,3 +1,3 @@
-from agenttest1 import train, run
+from agent_primitive import train, run
 
 run()
