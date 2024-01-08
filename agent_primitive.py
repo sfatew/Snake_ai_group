@@ -168,7 +168,48 @@ def train():
 
             plot_scores.append(score)
             total_score += score
-   action(state_old)
+            mean_score = total_score / numgame
+            plot_mean_scores.append(mean_score)
+            plot(plot_scores, plot_mean_scores)
+
+        #checkpoint
+        model_folder_path = './model'
+        if not os.path.exists(model_folder_path):
+            os.makedirs(model_folder_path)
+
+        file_name = os.path.join(model_folder_path, 'checkpoint.pth')
+
+        checkpoint = {
+            "n_games": agent.n_games,
+            "record": agent.record,
+            "model_state": agent.model.state_dict(),
+            "optim_state": agent.trainer.optimizer.state_dict()
+        }
+
+        torch.save(checkpoint, file_name) 
+
+
+def run():
+    agent = Agent()
+    game = SnakeGameAI()
+
+
+    if os.path.exists('model/checkpoint.pth'):
+        load_checkpoint = torch.load('model/checkpoint.pth')
+        # print(load_checkpoint)
+
+        agent.n_games = load_checkpoint["n_games"]
+        agent.record = load_checkpoint["record"]
+        agent.model.load_state_dict(load_checkpoint["model_state"])
+        agent.trainer.optimizer.load_state_dict(load_checkpoint["optim_state"])
+
+
+    while True:
+        # get old state
+        state_old = agent.get_state(game)
+
+        #get move
+        final_move = agent.get_action(state_old)
 
         #perform move and get new state
         reward, game_over, score = game.play_step(final_move)
