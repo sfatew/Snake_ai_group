@@ -194,8 +194,8 @@ def run():
     game = SnakeGameAI()
 
 
-    if os.path.exists('model/checkpoint_1.pth'):
-        load_checkpoint = torch.load('model/checkpoint_1.pth')
+    if os.path.exists('model/checkpoint.pth'):
+        load_checkpoint = torch.load('model/checkpoint.pth')
         # print(load_checkpoint)
 
         agent.n_games = load_checkpoint["n_games"]
